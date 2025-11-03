@@ -18,10 +18,10 @@ const Home: React.FC = () => {
       </p>
 
       <div className="login-options">
-        <div className="login-card" onClick={() => navigate("/login/user/UserLogin")}>
+        <div className="login-card" onClick={() => navigate("/login/auth/user/")}>
           Login as User
         </div>
-        <div className="login-card" onClick={() => navigate("/login/employer/EmployerLogin")}>
+        <div className="login-card" onClick={() => navigate("/login/auth/employer/")}>
           Login as Employer
         </div>
       </div>

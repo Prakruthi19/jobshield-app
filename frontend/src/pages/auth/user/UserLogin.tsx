@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginCard from "../../../components/auth/logincard/LoginCard";
 import "./user-login.scss";
+import { loginUser } from "../../../api/authService";
+import toast from "react-hot-toast";
 
 const UserLogin: React.FC = () => {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -16,17 +18,19 @@ const UserLogin: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
-      // Replace with your API call
-      // const res = await axios.post("/api/auth/login", form);
+      const result = await loginUser(form);
       console.log("Login submitted:", form);
-
+      toast.success(result.data.message || "Login successful!");
       // Navigate to user dashboard
-      navigate("/dashboard/user");
-    } catch (err) {
+    setTimeout(() => {
+      navigate("/dashboard/user"); // React Router
+    }, 1500);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Login failed. Please try again.";
       console.error(err);
-      alert("Login failed. Please check your credentials.");
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

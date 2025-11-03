@@ -42,7 +42,8 @@ export const register = async (req: Request, res: Response) => {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
+        role: user.role
       }
     });
   } catch (error) {
@@ -88,5 +89,24 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });
+  }
+  
+};
+export const demo = (_req: Request, res: Response) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "Demo API is working!",
+      data: {
+        timestamp: new Date(),
+        info: "This is a test endpoint",
+      },
+    });
+  } catch (error) {
+    console.error("Demo API Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

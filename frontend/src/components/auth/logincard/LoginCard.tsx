@@ -47,14 +47,14 @@ const LoginCard: React.FC<Props> = ({ title, form, onChange, onSubmit, loading, 
       </button>
 
       <div className="login-links">
-        <a href="/reset-password" className="login-link" style={{ color: themeColor }}>
+        <a href="/reset-password" style={{ color: themeColor }}>
           Forgot password?
         </a>
       </div>
 
       <div className="signup-text">
         Don't have an account?{" "}
-        <a href="/register" className="signup-link" style={{ color: themeColor }}>
+        <a href="/register/auth/user/" style={{ color: themeColor }}>
           Sign Up
         </a>
       </div>

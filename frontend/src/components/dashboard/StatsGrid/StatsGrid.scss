@@ -1,0 +1,25 @@
+@import '../../../../_variable.scss';   
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: $bg-paper;
+  padding: 1.5rem;
+  border-radius: $border-radius-lg;
+  @include card-shadow;
+  border: 1px solid $gray-200;
+
+  &__content { display: flex; align-items: center; justify-content: space-between; }
+  &__info { flex: 1; }
+  &__label { font-size: 0.875rem; color: $text-secondary; margin: 0 0 0.25rem 0; }
+  &__value { font-size: 1.875rem; font-weight: bold; color: $text-primary; margin: 0; }
+  &__icon { @include flex-center; width: 3rem; height: 3rem; border-radius: $border-radius-lg; }
+  &__icon--blue { background-color: $blue-light; color: $blue-medium; }
+  &__icon--green { background-color: $green-light; color: $green-medium; }
+  &__icon--purple { background-color: $navy-light; color: $navy-medium; }
+}

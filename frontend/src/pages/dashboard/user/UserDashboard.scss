@@ -1,0 +1,22 @@
+@import '../../../../_variable.scss';   
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  background-color: $bg-default;
+}
+
+.main-content {
+  flex: 1;
+  overflow: auto;
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+}

@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import Home from './pages/home/Home';
 import UserLogin from './pages/auth/user/UserLogin';
 import UserRegister from './pages/auth/user/UserRegister'
-import UserDashboard from './pages/auth/dashboard/UserDashboard';
+import UserDashboard from './pages/dashboard/user/UserDashboard';
 
 const App = () => {
   return (

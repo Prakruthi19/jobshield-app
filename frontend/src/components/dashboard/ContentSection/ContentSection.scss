@@ -1,0 +1,18 @@
+@import '../../../../_variable.scss';   
+
+.content-section {
+  background-color: $bg-paper;
+  border-radius: $border-radius-lg;
+  @include card-shadow;
+  border: 1px solid $gray-200;
+  padding: 2rem;
+}
+
+.placeholder {
+  text-align: center;
+  padding: 3rem 0;
+
+  &__icon { margin: 0 auto 1rem; color: $gray-400; }
+  &__title { font-size: 1.25rem; font-weight: 600; color: $text-primary; margin: 0 0 0.5rem 0; }
+  &__text { color: $text-secondary; margin: 0; }
+}

@@ -1,0 +1,49 @@
+// Variables - Theme Colors
+$primary-color: #0B3D91;
+$primary-dark: #082c6b;
+$primary-light: #1e4fa1;
+$secondary-color: #2563EB;
+$info-color: #1E40AF;
+$error-color: #EF4444;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+
+// Background Colors
+$bg-default: #E5E7EB;
+$bg-paper: #FFFFFF;
+
+// Text Colors
+$text-primary: #111827;
+$text-secondary: #374151;
+
+// Gray Scale
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-400: #9ca3af;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+
+// Stat Card Colors
+$blue-light: #dbeafe;
+$blue-medium: #2563eb;
+$green-light: #d1fae5;
+$green-medium: #059669;
+$navy-light: #c7d2fe;
+$navy-medium: #0B3D91;
+
+$border-radius: 0.5rem;
+$border-radius-lg: 0.75rem;
+$transition: all 0.3s ease;
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

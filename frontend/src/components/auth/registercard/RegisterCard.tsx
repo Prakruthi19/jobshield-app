@@ -1,55 +1,53 @@
 import React, { useState } from "react";
 import "./RegisterCard.scss";
-import { toast } from "react-hot-toast";
 import { UserPlus } from "lucide-react";
-import { registerUser } from "../../../api/authService";
-import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 interface UserRegisterProps {
   title?: string;
   subtitle?: string;
-  themeColor: string;
+  themeColor?: string;
   role: string;
+  onSubmitData: (formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: string;
+  }) => void;
+  loading: boolean;
 }
 
-const UserRegister: React.FC<UserRegisterProps> = ({ title, subtitle, themeColor, role }) => {
+const UserRegister: React.FC<UserRegisterProps> = ({ 
+  title, 
+  subtitle, 
+  themeColor = "var(--primary-color)", 
+  role,
+  onSubmitData, 
+  loading 
+}) => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role : role
-   
+    role: role
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const navigate = useNavigate();
-     try {
-    const result = await registerUser(formData);
-    console.log("User Registered:", result);
-    toast.success(result.data.message || "Registration successful!");
-
-    // 2️⃣ Save token for authentication
-    localStorage.setItem("token", result.data.token);
-
-    // 3️⃣ Optionally save user info
-    localStorage.setItem("user", JSON.stringify(result.data.user));
-
-    setTimeout(() => {
-      navigate("/dashboard/user"); // React Router
-    }, 1500);
-  } catch (error: any) {
-    console.error("Registration failed:", error.response?.data || error.message);
-    // Error toast using API error message
-    const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
-    toast.error(errorMessage);
-    // Optional: show error notification
+    if (formData.password !== formData.confirmPassword) {
+    toast.error("Passwords do not match!");
+    return;
   }
+    onSubmitData(formData);
   };
 
   return (
@@ -126,8 +124,8 @@ const UserRegister: React.FC<UserRegisterProps> = ({ title, subtitle, themeColor
           />
         </div>
 
-        <button type="submit" className="register-btn">
-          Register
+        <button type="submit" className="register-btn"  disabled={loading} >
+           {loading ? "Registering..." : "Register"}
         </button>
       </form>
 

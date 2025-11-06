@@ -1,26 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./logincard.scss";
 
 type Props = {
-  form: { email: string; password: string };
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  loading: boolean;
-  themeColor: string;
   title: string;
+  themeColor?: string;
+  loading?: boolean;
+  onSubmitData: (formData: { email: string; password: string }) => void;
 };
 
-const LoginCard: React.FC<Props> = ({ title, form, onChange, onSubmit, loading, themeColor }) => {
+const LoginCard: React.FC<Props> = ({
+  title,
+  themeColor = "var(--primary-color)",
+  loading = false,
+  onSubmitData,
+}) => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmitData(formData);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="login-form">
+    <form onSubmit={handleSubmit} className="login-form">
       <h2 className="login-title" style={{ color: themeColor }}>
         {title}
       </h2>
 
       <input
         name="email"
-        value={form.email}
-        onChange={onChange}
+        value={formData.email}
+        onChange={handleChange}
         type="email"
         placeholder="Email"
         className="login-input"
@@ -29,8 +45,8 @@ const LoginCard: React.FC<Props> = ({ title, form, onChange, onSubmit, loading, 
 
       <input
         name="password"
-        value={form.password}
-        onChange={onChange}
+        value={formData.password}
+        onChange={handleChange}
         type="password"
         placeholder="Password"
         className="login-input"
@@ -47,16 +63,16 @@ const LoginCard: React.FC<Props> = ({ title, form, onChange, onSubmit, loading, 
       </button>
 
       <div className="login-links">
-        <a href="/reset-password" style={{ color: themeColor }}>
+        <Link to="/reset-password" style={{ color: themeColor }}>
           Forgot password?
-        </a>
+        </Link>
       </div>
 
       <div className="signup-text">
-        Don't have an account?{" "}
-        <a href="/register/auth/user/" style={{ color: themeColor }}>
+        Don't have an account?{' '}
+        <Link to="/register/auth/user/" style={{ color: themeColor }}>
           Sign Up
-        </a>
+        </Link>
       </div>
     </form>
   );

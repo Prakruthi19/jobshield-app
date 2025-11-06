@@ -7,22 +7,21 @@ import toast from "react-hot-toast";
 
 const UserLogin: React.FC = () => {
    const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (formData: { email: string; password: string }) => {
     setLoading(true);
   
     try {
-      const result = await loginUser(form);
-      console.log("Login submitted:", form);
+      console.log("Login submitted:", formData);
+      const result = await loginUser(formData);
+ 
       toast.success(result.data.message || "Login successful!");
+      
+      // Store auth token
+      localStorage.setItem('token', result.data.token);
+      localStorage.setItem('user', JSON.stringify(result.data.user));
+      
       // Navigate to user dashboard
     setTimeout(() => {
       navigate("/dashboard/user"); // React Router
@@ -40,10 +39,8 @@ const UserLogin: React.FC = () => {
     <div className="user-login-page">
       <LoginCard 
         title="User Login"
-        form={form}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
         loading={loading}
+        onSubmitData={handleLogin}
         themeColor="var(--primary-color)"
       />
     </div>

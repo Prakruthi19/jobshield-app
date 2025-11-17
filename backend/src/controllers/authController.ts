@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { admin } from "../lib/firebaseAdmin"; 
 import prisma from './../config/prisma';
-
+import { verifyIdToken } from "../lib/firebaseAdmin";
 // Register
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName , role} = req.body;
+    const { email, password, firstName, lastName, phone, role} = req.body;
 
     // Check if user exists
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -14,84 +13,101 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const firebaseUser = await admin.auth().createUser({
+      email,
+      password,
+    });
 
-    // Create user
-    const user = await prisma.user.create({
+    await admin.auth().setCustomUserClaims(firebaseUser.uid, { role });
+
+
+     const newUser = await prisma.user.create({
       data: {
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role
-      }
+        firebaseUid: firebaseUser.uid,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        role: role ? role : undefined, // optional
+      },
+    });
+     return res.status(201).json({
+      message: "User registered successfully",
+      user: newUser,
     });
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '7d' }
-    );
-
-    return res.status(201).json({
-      message: 'User registered successfully',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
   }
+
 };
 
 // Login
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
 
-    // Find user
+    const authHeader = req.headers.authorization; // Express style
+    console.log(authHeader);
+    if (!authHeader) return res.status(401).json({ error: "No token provided" });
+
+    const token = authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "Invalid token format" });
+
+    const decodedToken = await verifyIdToken(token);
+    const uid = decodedToken.uid;
+    console.log(uid)
+    console.log("<<<<<<<Token Verified>>>>>>>>>>");
+
+    console.log("Request Body ", req);
+
+    console.log("USER ROLE>>>>>>>>>>>>>>>>", decodedToken.role);
+    const {email} = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Check password
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '7d' }
-    );
-
-    return res.json({
-      message: 'Login successful',
-      token,
+    
+     return res.json({
+      message: "Login successful",
+      token, // Firebase ID token
       user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName
-      }
+        id: user?.id,
+        // firebaseUid: user.firebaseUid,
+        email: user?.email,
+        name: user?.firstName,
+        role: user?.role
+      },
     });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+  } catch (err: any) {
+    console.error("Login error:", err);
+    return res.status(401).json({ error: "Unauthorized" });
   }
-  
 };
+
+
+// GET /api/users/:userId/phone
+export const getUserPhone =  async (req: Request, res : Response) => {
+  const { userId } = req.params;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { phone: true },
+    });
+
+    if (!user || !user.phone) {
+      return res.status(404).json({ error: "Phone number not found" });
+    }
+
+    // Mask all but last 4 digits
+    const phoneStr = user.phone.toString(); // convert number → string
+    const maskedPhone = phoneStr.replace(/\d(?=\d{4})/g, "*");
+  
+
+    return res.json({ phone: maskedPhone });
+  } catch (err) {
+    console.error(err);
+   return  res.status(500).json({ error: "Server error" });
+  }
+};
+ 
 export const demo = (_req: Request, res: Response) => {
   try {
     return res.status(200).json({

@@ -2,41 +2,41 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./logincard.scss";
 
-type Props = {
+interface LoginCardProps  {
   title: string;
   themeColor?: string;
   loading?: boolean;
-  onSubmitData: (formData: { email: string; password: string }) => void;
+  username: string;
+  password: string;
+  onUsernameChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: () => void;
 };
 
-const LoginCard: React.FC<Props> = ({
+
+const LoginCard: React.FC<LoginCardProps> = ({
   title,
   themeColor = "var(--primary-color)",
   loading = false,
-  onSubmitData,
+  username,
+  password,
+  onUsernameChange,
+  onPasswordChange,
+  onSubmit,
 }) => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmitData(formData);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="login-form">
+    <form onSubmit={(e) => {
+      e.preventDefault(); // prevent default form submit
+      onSubmit();
+    }} className="login-form">
       <h2 className="login-title" style={{ color: themeColor }}>
         {title}
       </h2>
 
       <input
         name="email"
-        value={formData.email}
-        onChange={handleChange}
+        value={username}
+        onChange={(e) => onUsernameChange(e.target.value)}
         type="email"
         placeholder="Email"
         className="login-input"
@@ -45,8 +45,8 @@ const LoginCard: React.FC<Props> = ({
 
       <input
         name="password"
-        value={formData.password}
-        onChange={handleChange}
+        value={password}
+        onChange={(e) => onPasswordChange(e.target.value)}
         type="password"
         placeholder="Password"
         className="login-input"
@@ -61,7 +61,6 @@ const LoginCard: React.FC<Props> = ({
       >
         {loading ? "Logging in..." : "Login"}
       </button>
-
       <div className="login-links">
         <Link to="/reset-password" style={{ color: themeColor }}>
           Forgot password?

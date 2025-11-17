@@ -15,6 +15,7 @@ interface UserRegisterProps {
     password: string;
     confirmPassword: string;
     role: string;
+    phone: string;
   }) => void;
   loading: boolean;
 }
@@ -33,6 +34,7 @@ const UserRegister: React.FC<UserRegisterProps> = ({
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
     role: role
   });
 
@@ -43,11 +45,14 @@ const UserRegister: React.FC<UserRegisterProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (formData.password !== formData.confirmPassword) {
     toast.error("Passwords do not match!");
     return;
   }
-    onSubmitData(formData);
+    onSubmitData({
+    ...formData,
+  });
   };
 
   return (
@@ -93,6 +98,18 @@ const UserRegister: React.FC<UserRegisterProps> = ({
             name="email"
             placeholder="Enter your email"
             value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+            <div className="input-group">
+          <label htmlFor="phoneNumber">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="Enter your phone number"
+            value={formData.phone}
             onChange={handleChange}
             required
           />

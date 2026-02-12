@@ -1,4 +1,4 @@
-# JobShield — Fake Job Detection & Hiring Platform
+# JobShield: Fake Job Detection & Hiring Platform
 
 A full-stack job portal that protects candidates from fraudulent job postings using Machine Learning while providing employers with a clean ATS-style hiring dashboard.
 

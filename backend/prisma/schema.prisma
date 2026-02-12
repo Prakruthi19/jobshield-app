@@ -1,12 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ============================================
+// JOB PORTAL - PRISMA SCHEMA
+// File: prisma/schema.prisma
+// ============================================
 
 generator client {
   provider = "prisma-client-js"
- 
 }
 
 datasource db {
@@ -14,20 +12,426 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================
+// 1. USER MODEL
+// ============================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  role         Role     @default(JOBSEEKER)
+
+ // 🔐 Auth
+  passwordHash String?          // now optional
+  provider     AuthProvider     @default(EMAIL)
+  googleSubId  String?          @unique @map("google_sub_id")
+  profileComplete Boolean       @default(false)
+
+  phone        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  companiesCreated  Company[]        @relation("CompanyCreator")
+  jobsPosted        Job[]            @relation("JobPoster")
+  applications      JobApplication[]
+  savedJobs         SavedJob[]
+  jobReports        JobReport[]
+  jobReviews        JobReview[]
+  notifications     Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
 enum Role {
   JOBSEEKER
   EMPLOYER
   ADMIN
 }
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  EMAIL_GOOGLE
+}
+// ============================================
+// 2. COMPANY MODEL
+// ============================================
 
-model User {
-  id        String   @id @default(uuid())
-  firebaseUid String   @unique
-  email     String   @unique
-  firstName String
-  lastName  String
-  phone     String
-  role      Role     @default(EMPLOYER)
+model Company {
+  id                    String    @id @default(uuid())
+  name                  String
+  slug                  String    @unique
+  description           String?   @db.Text
+  industry              String?
+  companySize           CompanySize? @map("company_size")
+  foundedYear           Int?      @map("founded_year")
+  websiteUrl            String?   @map("website_url") @db.Text
+  email                 String?
+  phone                 String?
+  headquartersLocation  String?   @map("headquarters_location")
+  headquartersCountry   String?   @map("headquarters_country")
+  hasCompanyLogo Int @map("has_company_logo") @default(0)
+  coverImageUrl         String?   @map("cover_image_url") @db.Text
+  isVerified            Boolean   @default(false) @map("is_verified")
+  verificationDate      DateTime? @map("verification_date")
+  verificationDocuments Json?     @map("verification_documents")
+  linkedinUrl           String?   @map("linkedin_url") @db.Text
+  status                CompanyStatus @default(ACTIVE)
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
   
-  @@map("users")
+  //remove these
+  //logoUrl
+  // Relations
+  createdBy             User?     @relation("CompanyCreator", fields: [createdByUserId], references: [id])
+  createdByUserId       String?   @map("created_by_user_id")
+  jobs                  Job[]
+  reputation            EmployerReputation?
+
+  @@index([name])
+  @@index([slug])
+  @@index([industry])
+  @@index([isVerified])
+  @@index([status])
+  @@map("companies")
+}
+
+enum CompanySize {
+  SIZE_1_10     @map("1-10")
+  SIZE_11_50    @map("11-50")
+  SIZE_51_200   @map("51-200")
+  SIZE_201_500  @map("201-500")
+  SIZE_501_1000 @map("501-1000")
+  SIZE_1001_5000 @map("1001-5000")
+  SIZE_5000_PLUS @map("5000+")
+}
+
+enum CompanyStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+// ============================================
+// 3. JOB MODEL (WITH ALL ML FIELDS)
+// ============================================
+
+model Job {
+  id                   String    @id @default(uuid())
+  
+  // ML Dataset Fields (All Optional)
+  title                String?   @db.VarChar(500)
+  location             String?   @db.VarChar(500)
+  department           String?
+  salaryRange          String?   @map("salary_range") @db.Text
+  companyProfile       String?   @map("company_profile") @db.Text
+  description          String?   @db.Text
+  requirements         String?   @db.Text
+  benefits             String?   @db.Text
+  telecommuting        Int?      @default(0)
+  hasCompanyLogo       Int?      @default(0) @map("has_company_logo")
+  hasQuestions         Int?      @default(0) @map("has_questions")
+  employmentType       String?   @map("employment_type")
+  requiredExperience   String?   @map("required_experience") @db.VarChar(100)
+  requiredEducation    String?   @map("required_education") @db.VarChar(100)
+  industry             String?
+  function             String?
+  fraudulent           Int?      @default(0)
+
+  // ML Results
+  mlFraudProbability   Decimal?  @map("ml_fraud_probability") @db.Decimal(5, 4)
+  mlModelVersion       String?   @map("ml_model_version")
+  mlPredictedAt        DateTime? @map("ml_predicted_at")
+
+  // Trust Score
+  trustScore           Int?      @default(0) @map("trust_score")
+  trustScoreUpdatedAt  DateTime? @map("trust_score_updated_at")
+
+  // Status
+  status               JobStatus @default(ACTIVE)
+
+  // SEO
+  slug                 String?   @unique @db.VarChar(500)
+
+  // Relations
+  company              Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId            String    @map("company_id")
+  postedBy             User     @relation("JobPoster", fields: [postedByUserId], references: [id])
+  postedByUserId       String    @map("posted_by_user_id")
+
+  mlPredictions        MlPrediction[]
+  applications         JobApplication[]
+  savedBy              SavedJob[]
+  reports              JobReport[]
+  reviews              JobReview[]
+  skills               JobSkill[]
+
+  //remove these
+  //expiresAt
+  //publishedAt
+  // salaryMin
+  // salaryMax
+  // salaryCurrency
+  // salaryPeriod
+  // slug
+  // viewsCount
+
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  @@index([companyId])
+  @@index([postedByUserId])
+  @@index([status])
+  @@index([trustScore])
+  @@index([location])
+  @@index([industry])
+  @@index([employmentType])
+  @@index([mlFraudProbability])
+  @@map("jobs")
+}
+
+enum SalaryPeriod {
+  HOURLY
+  MONTHLY
+  YEARLY
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  FILLED
+  SUSPENDED
+  FLAGGED
+}
+
+// ============================================
+// 4. ML PREDICTION MODEL
+// ============================================
+
+model MlPrediction {
+  id                        String   @id @default(uuid())
+  modelVersion              String   @map("model_version")
+  modelName                 String   @map("model_name")
+  fraudProbability          Decimal  @map("fraud_probability") @db.Decimal(5, 4)
+  isFraudulent              Boolean  @map("is_fraudulent")
+  confidenceScore           Decimal? @map("confidence_score") @db.Decimal(5, 4)
+  topFraudIndicators        Json?    @map("top_fraud_indicators")
+  topLegitimateIndicators   Json?    @map("top_legitimate_indicators")
+  featuresUsed              Json?    @map("features_used")
+  predictionTimeMs          Int?     @map("prediction_time_ms")
+  predictedAt               DateTime @default(now()) @map("predicted_at")
+
+  // Relations
+  job                       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId                     String   @map("job_id")
+
+  @@index([jobId])
+  @@index([fraudProbability])
+  @@map("ml_predictions")
+}
+
+// ============================================
+// 5. JOB APPLICATION MODEL
+// ============================================
+
+model JobApplication {
+ id        String   @id @default(uuid())
+
+  jobId     String
+  userId    String   
+
+  name      String
+  email     String
+  address   String
+  resumeUrl String
+  createdAt DateTime @default(now())
+
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId]) // prevent applying twice
+  @@index([jobId])
+  @@index([userId])
+  @@map("job_applications")
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  REJECTED
+  WITHDRAWN
+  ACCEPTED
+}
+
+// ============================================
+// 6. SAVED JOB MODEL
+// ============================================
+
+model SavedJob {
+  id        String   @id @default(uuid())
+  notes     String?  @db.Text
+  savedAt   DateTime @default(now()) @map("saved_at")
+
+  // Relations
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId     String   @map("job_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+
+  @@unique([jobId, userId])
+  @@index([userId])
+  @@index([jobId])
+  @@map("saved_jobs")
+}
+
+// ============================================
+// 7. JOB REPORT MODEL
+// ============================================
+
+model JobReport {
+  id                  String       @id @default(uuid())
+  reason              ReportReason
+  description         String?      @db.Text
+  status              ReportStatus @default(PENDING)
+  createdAt           DateTime     @default(now()) @map("created_at")
+  reviewedAt          DateTime?    @map("reviewed_at")
+
+  // Relations
+  job                 Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId               String       @map("job_id")
+  reportedBy          User         @relation(fields: [reportedByUserId], references: [id])
+  reportedByUserId    String       @map("reported_by_user_id")
+
+  @@index([jobId])
+  @@index([status])
+  @@map("job_reports")
+}
+
+enum ReportReason {
+  FAKE
+  SCAM
+  MISLEADING
+  INAPPROPRIATE
+  DUPLICATE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+// ============================================
+// 8. JOB REVIEW MODEL
+// ============================================
+
+model JobReview {
+  id              String   @id @default(uuid())
+  rating          Int
+  reviewText      String?  @map("review_text") @db.Text
+  wasInterviewed  Boolean  @default(false) @map("was_interviewed")
+  wasHired        Boolean  @default(false) @map("was_hired")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  job             Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId           String   @map("job_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @map("user_id")
+
+  @@unique([jobId, userId])
+  @@index([jobId])
+  @@map("job_reviews")
+}
+
+// ============================================
+// 9. SKILLS MODELS
+// ============================================
+
+model Skill {
+  id       String     @id @default(uuid())
+  name     String     @unique
+  category String?
+
+  // Relations
+  jobs     JobSkill[]
+
+  @@map("skills")
+}
+
+model JobSkill {
+  isRequired Boolean @default(true) @map("is_required")
+
+  // Relations
+  job        Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId      String  @map("job_id")
+  skill      Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId    String  @map("skill_id")
+
+  @@id([jobId, skillId])
+  @@map("job_skills")
+}
+
+// ============================================
+// 10. EMPLOYER REPUTATION MODEL
+// ============================================
+
+model EmployerReputation {
+  id                          String   @id @default(uuid())
+  totalJobsPosted             Int      @default(0) @map("total_jobs_posted")
+  activeJobs                  Int      @default(0) @map("active_jobs")
+  averageJobTrustScore        Decimal  @default(0) @map("average_job_trust_score") @db.Decimal(5, 2)
+  totalApplicationsReceived   Int      @default(0) @map("total_applications_received")
+  responseRate                Decimal  @default(0) @map("response_rate") @db.Decimal(5, 2)
+  reputationScore             Int      @default(50) @map("reputation_score")
+  hasViolations               Boolean  @default(false) @map("has_violations")
+  violationCount              Int      @default(0) @map("violation_count")
+  updatedAt                   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  company                     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId                   String   @unique @map("company_id")
+
+  @@map("employer_reputation")
+}
+
+// ============================================
+// 11. NOTIFICATION MODEL
+// ============================================
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  linkUrl   String?          @map("link_url") @db.Text
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String           @map("user_id")
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  APPLICATION_STATUS
+  NEW_JOB_MATCH
+  SAVED_JOB_UPDATE
+  TRUST_SCORE_ALERT
+  MESSAGE
 }

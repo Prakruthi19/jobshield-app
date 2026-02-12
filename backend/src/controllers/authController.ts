@@ -1,128 +1,253 @@
-import { Request, Response } from 'express';
-import { admin } from "../lib/firebaseAdmin"; 
-import prisma from './../config/prisma';
-import { verifyIdToken } from "../lib/firebaseAdmin";
-// Register
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const prisma = new PrismaClient();
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { id: string; role: string };
+    }
+  }
+}
+
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName, phone, role} = req.body;
+    const { email, password, firstName, lastName, phone, role } = req.body;
+
+    // Validate minimal fields
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
     // Check if user exists
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    const firebaseUser = await admin.auth().createUser({
-      email,
-      password,
-    });
+    const saltedHash = await bcrypt.hash(password, 12);
 
-    await admin.auth().setCustomUserClaims(firebaseUser.uid, { role });
-
-
-     const newUser = await prisma.user.create({
+    // Store in DB
+    const newUser = await prisma.user.create({
       data: {
-        firebaseUid: firebaseUser.uid,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-        role: role ? role : undefined, // optional
+        email,
+        firstName,
+        lastName,
+        phone,
+        role,
+        passwordHash: saltedHash,
       },
+      select: {
+        id: true,
+        role: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      }
     });
-     return res.status(201).json({
+
+    // Sign JWT with role for RBAC
+    const token = jwt.sign(
+      {
+        userId: newUser.id,
+        role: newUser.role,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(201).json({
       message: "User registered successfully",
-      user: newUser,
+      token,
+      role: newUser.role,
+      userId: newUser.id,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Register Error:", err);
     return res.status(500).json({ message: "Server error" });
   }
-
 };
 
-// Login
 export const login = async (req: Request, res: Response) => {
   try {
+    const { email, password } = req.body; // SHA256 incoming from FE
 
-    const authHeader = req.headers.authorization; // Express style
-    console.log(authHeader);
-    if (!authHeader) return res.status(401).json({ error: "No token provided" });
-
-    const token = authHeader.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "Invalid token format" });
-
-    const decodedToken = await verifyIdToken(token);
-    const uid = decodedToken.uid;
-    console.log(uid)
-    console.log("<<<<<<<Token Verified>>>>>>>>>>");
-
-    console.log("Request Body ", req);
-
-    console.log("USER ROLE>>>>>>>>>>>>>>>>", decodedToken.role);
-    const {email} = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
-    
-     return res.json({
-      message: "Login successful",
-      token, // Firebase ID token
-      user: {
-        id: user?.id,
-        // firebaseUid: user.firebaseUid,
-        email: user?.email,
-        name: user?.firstName,
-        role: user?.role
+    const user = await prisma.user.findUnique({
+      where: { email },
+        select: {
+        id: true,
+        firstName: true,
+        email: true,
+        role: true,
+        passwordHash: true,
+        provider: true,
       },
     });
-  } catch (err: any) {
-    console.error("Login error:", err);
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-};
 
-
-// GET /api/users/:userId/phone
-export const getUserPhone =  async (req: Request, res : Response) => {
-  const { userId } = req.params;
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { phone: true },
-    });
-
-    if (!user || !user.phone) {
-      return res.status(404).json({ error: "Phone number not found" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Mask all but last 4 digits
-    const phoneStr = user.phone.toString(); // convert number → string
-    const maskedPhone = phoneStr.replace(/\d(?=\d{4})/g, "*");
-  
+    if (user.provider === "GOOGLE") {
+          return res.status(400).json({
+            message: "This account was created using Google. Please continue with Google login.",
+            provider: "GOOGLE",
+          });
+        }
+      if (!user.passwordHash) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+    
 
-    return res.json({ phone: maskedPhone });
+    return res.json({
+      message: "Login successful",
+      token,
+      userId: user.id,
+      role: user.role,
+      userName: user.firstName,
+      userEmail: user.email,
+       provider: user.provider,
+    });
+
   } catch (err) {
-    console.error(err);
-   return  res.status(500).json({ error: "Server error" });
+    console.error("Login Error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
- 
-export const demo = (_req: Request, res: Response) => {
+
+
+
+export const logout = async (req: Request, res: Response) => {
   try {
+    console.log(`User ${req.user?.id} logged out`);
+
     return res.status(200).json({
       success: true,
-      message: "Demo API is working!",
-      data: {
-        timestamp: new Date(),
-        info: "This is a test endpoint",
-      },
+      message: "Logout successful"
     });
   } catch (error) {
-    console.error("Demo API Error:", error);
+    console.error("Logout error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Server error"
     });
+  }
+};
+
+
+export const googleAuth = async (req: Request, res: Response) => {
+  try {
+    const { token, loginType } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Missing Google token" });
+    }
+
+   
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+        if (!["EMPLOYER", "JOBSEEKER"].includes(loginType)) {
+      return res.status(400).json({ message: "Invalid login type" });
+    }
+    if (!payload || !payload.email || !payload.sub) {
+      return res.status(401).json({ message: "Invalid Google token" });
+    }
+
+    if (!payload.email_verified) {
+      return res.status(401).json({ message: "Google email not verified" });
+    }
+
+    const email = payload.email;
+    const firstName = payload.given_name || "User";
+    const lastName = payload.family_name || "";
+    const googleSubId = payload.sub;
+
+    let user;
+    let isNewUser = false;
+
+    user = await prisma.user.findUnique({
+      where: { googleSubId },
+    });
+
+   
+    if (!user) {
+      const existingEmailUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingEmailUser) {
+           if (existingEmailUser.role && existingEmailUser.role !== loginType) {
+          return res.status(403).json({
+            message: `This account is registered as ${existingEmailUser.role}. Please use the correct login page.`,
+          });
+        }
+        user = await prisma.user.update({
+          where: { id: existingEmailUser.id },
+          data: {
+            googleSubId,
+            provider:
+              existingEmailUser.provider === "EMAIL"
+                ? "EMAIL_GOOGLE"
+                : existingEmailUser.provider,
+            role: existingEmailUser.role ?? loginType,
+          },
+        });
+      }
+    }
+
+
+    if (!user) {
+      isNewUser = true;
+
+      user = await prisma.user.create({
+        data: {
+          email,
+          firstName,
+          lastName,
+          googleSubId,
+          provider: "GOOGLE",
+          role: loginType,
+          profileComplete: false,
+        },
+      });
+    }
+
+
+    const jwtToken = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      token: jwtToken,
+      userId: user.id,
+      role: user.role,
+      userName: user.firstName,
+      userEmail: user.email,
+      profileComplete: user.profileComplete,
+      isNewUser,
+    });
+
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    return res.status(500).json({ message: "Google authentication failed" });
   }
 };

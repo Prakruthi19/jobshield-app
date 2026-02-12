@@ -1,16 +1,17 @@
 import React from 'react';
-import { Briefcase, Bookmark, TrendingUp } from 'lucide-react';
+import { Briefcase, Bookmark, TrendingUp, MoveRight, Check } from 'lucide-react';
 import './StatsGrid.scss';
 
 interface StatsGridProps {
-  stats: { appliedJobs: number; savedJobs: number; interviews: number };
+   stats: { activejobs: number; applied: number; saved: number, recommended: number; analytics: number };
 }
 
 export default function StatsGrid({ stats }: StatsGridProps) {
   const statCards = [
-    { label: 'Applied Jobs', value: stats.appliedJobs, icon: Briefcase, color: 'blue' },
-    { label: 'Saved Jobs', value: stats.savedJobs, icon: Bookmark, color: 'green' },
-    { label: 'Interviews', value: stats.interviews, icon: TrendingUp, color: 'purple' },
+    { label: 'Active Jobs', value: stats.activejobs, icon: Briefcase, color: 'blue' },
+    { label: 'Applied Jobs', value: stats.applied, icon: Check, color: 'green' },
+    { label: 'Saved Jobs', value: stats.saved, icon: Bookmark, color: 'yellow' },
+
   ];
 
   return (

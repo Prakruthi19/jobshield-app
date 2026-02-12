@@ -1,0 +1,135 @@
+/* Container that wraps the form */
+.job-form-container {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 8px 20px rgba(32, 33, 36, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-sizing: border-box;
+}
+
+.job-form-wrapper {
+  /* center the container inside parent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+
+  label {
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e3e6ea;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #222;
+    background: #fff;
+    box-sizing: border-box;
+  }
+
+  select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #666 50%), linear-gradient(135deg, #666 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 36px;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+.job-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+
+  button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: transform 0.06s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .secondary-btn {
+    background: #ffffff;
+    color: #333;
+    border-color: #e6e9ee;
+  }
+
+  .primary-btn {
+    background: #0B3D91;
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 14px rgba(11, 97, 255, 0.12);
+    :disabled {
+      background: #a0b4e6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .primary-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(11, 97, 255, 0.12);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .job-form-container {
+    padding: 18px;
+  }
+
+  .job-form {
+    gap: 12px;
+  }
+
+  .job-form .two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .job-form-actions {
+    justify-content: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .job-form-actions button {
+    width: 100%;
+  }
+}

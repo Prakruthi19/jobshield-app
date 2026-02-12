@@ -1,0 +1,27 @@
+export interface Company {
+  id?: string;
+  name?: string;
+}
+
+export interface Job {
+  id: string;
+  title: string;
+  location: string;
+  department?: string;
+  salaryRange?: string;
+  company?: Company | null;
+}
+
+export interface Application {
+  id: string;
+  jobId: string;
+  userId: string;
+
+  name: string;
+  email: string;
+  address: string;
+  resumeUrl: string;
+  createdAt: string;
+
+  job: Job;
+}

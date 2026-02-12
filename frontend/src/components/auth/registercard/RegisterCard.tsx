@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./RegisterCard.scss";
 import { UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
-
+import { Eye, EyeOff } from "lucide-react";
 interface UserRegisterProps {
   title?: string;
   subtitle?: string;
@@ -37,7 +37,8 @@ const UserRegister: React.FC<UserRegisterProps> = ({
     phone: "",
     role: role
   });
-
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -117,28 +118,45 @@ const UserRegister: React.FC<UserRegisterProps> = ({
 
         <div className="input-group">
           <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+        <div className="password-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              placeholder="Enter password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+
+            <span
+              className="toggle-eye"
+              onClick={() => setShowPassword(prev => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
+          </div>
         </div>
 
         <div className="input-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="Re-enter password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+           <div className="password-wrapper">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Re-enter password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            <span
+              className="toggle-eye"
+              onClick={() => setShowPassword(prev => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
+          </div>
         </div>
 
         <button type="submit" className="register-btn"  disabled={loading} >

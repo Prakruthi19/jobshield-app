@@ -1,0 +1,97 @@
+.profile-page {
+  min-height: 100vh;
+  background: #f4f6fb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 20px;
+}
+
+.profile-card {
+  background: white;
+  width: 520px;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  .title {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2a44;
+  }
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #eceff5;
+
+  .label {
+    font-weight: 500;
+    color: #5b647a;
+  }
+
+  .value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    span {
+      color: #1f2a44;
+      font-weight: 500;
+    }
+
+    input {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccd2e0;
+      outline: none;
+      font-size: 14px;
+
+      &:focus {
+        border-color: #4a7cff;
+        box-shadow: 0 0 0 2px rgba(74, 124, 255, 0.15);
+      }
+    }
+
+    button {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .edit {
+      background: transparent;
+      color: #4a7cff;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .save {
+      background: #2ecc71;
+      color: white;
+
+      &:hover {
+        background: #28b765;
+      }
+    }
+
+    .cancel {
+      background: #e5e7ef;
+
+      &:hover {
+        background: #d6dae6;
+      }
+    }
+  }
+}

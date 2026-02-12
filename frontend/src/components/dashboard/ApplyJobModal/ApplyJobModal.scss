@@ -1,0 +1,27 @@
+.applyOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.applyModal {
+  width:420px;
+  background:white;
+  padding:22px;
+  border-radius:10px;
+}
+
+.applyModal form {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}

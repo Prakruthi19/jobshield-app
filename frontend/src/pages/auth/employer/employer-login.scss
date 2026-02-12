@@ -1,0 +1,75 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; // full viewport height
+  width: 100%;
+  background: #f4faff; // optional (light gray)
+}
+.back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.4rem;
+  transition: background 0.15s, transform 0.1s;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: rgba(0,0,0,0.06);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 30.5rem; // 360px ≈ 22.5rem
+  padding: 1rem;
+  gap: 1rem; // space between elements
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: #666;
+  font-size: 0.875rem;
+
+  span {
+    padding: 0 0.5rem;
+    background: white;
+    z-index: 1;
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #d1d1d1;
+  }
+}
+
+.google-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  }
+

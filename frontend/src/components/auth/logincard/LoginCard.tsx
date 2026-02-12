@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./logincard.scss";
+import { Eye, EyeOff } from "lucide-react";
 
 interface LoginCardProps  {
   title: string;
@@ -11,6 +12,7 @@ interface LoginCardProps  {
   onUsernameChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onSubmit: () => void;
+  signUpLink?: string;
 };
 
 
@@ -23,7 +25,9 @@ const LoginCard: React.FC<LoginCardProps> = ({
   onUsernameChange,
   onPasswordChange,
   onSubmit,
+  signUpLink = "/register/auth/user/",
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <form onSubmit={(e) => {
       e.preventDefault(); // prevent default form submit
@@ -43,15 +47,24 @@ const LoginCard: React.FC<LoginCardProps> = ({
         required
       />
 
-      <input
-        name="password"
-        value={password}
-        onChange={(e) => onPasswordChange(e.target.value)}
-        type="password"
-        placeholder="Password"
-        className="login-input"
-        required
-      />
+     <div className="password-wrapper">
+          <input
+            name="password"
+            value={password}
+            onChange={(e) => onPasswordChange(e.target.value)}
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="login-input"
+            required
+          />
+
+          <span
+            className="toggle-eye"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </span>
+        </div>
 
       <button
         type="submit"
@@ -69,7 +82,7 @@ const LoginCard: React.FC<LoginCardProps> = ({
 
       <div className="signup-text">
         Don't have an account?{' '}
-        <Link to="/register/auth/user/" style={{ color: themeColor }}>
+        <Link to={signUpLink} style={{ color: themeColor }}>
           Sign Up
         </Link>
       </div>

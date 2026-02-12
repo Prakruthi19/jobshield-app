@@ -1,0 +1,133 @@
+/* ===== Theme Colors ===== */
+$primary: #0B3D91;       // navy blue
+$secondary: #2563EB;     // bright blue
+$error: #EF4444;         // red
+$info: #1E40AF;          // deep blue
+$bg-default: #E5E7EB;    // light gray
+$bg-paper: #FFFFFF;      // white
+$text-primary: #111827;  // dark
+$text-secondary: #374151;
+
+/* ===== Employer Jobs ===== */
+.employer-jobs {
+  padding: 24px;
+  background: $bg-default;
+  min-height: 100vh;
+
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    color: $primary;
+    margin-bottom: 16px;
+  }
+
+  .loading,
+  .empty {
+    margin-top: 20px;
+    color: $text-secondary;
+  }
+
+  .jobs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: $bg-paper;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+    thead {
+      background: rgba($primary, 0.08);
+
+      th {
+        text-align: left;
+        padding: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: $primary;
+      }
+    }
+
+    tbody {
+      tr {
+        border-top: 1px solid #e5e7eb;
+        transition: background 0.2s;
+
+        &:hover {
+          background: rgba($secondary, 0.05);
+        }
+
+        td {
+          padding: 14px;
+          font-size: 14px;
+          color: $text-primary;
+        }
+      }
+    }
+  }
+
+  /* ===== Status Badges ===== */
+  .status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.active {
+      background: rgba($secondary, 0.12);
+      color: $secondary;
+    }
+
+    &.draft {
+      background: rgba($info, 0.12);
+      color: $info;
+    }
+
+    &.closed {
+      background: rgba($error, 0.12);
+      color: $error;
+    }
+  }
+
+  /* ===== Actions ===== */
+  .actions {
+    display: flex;
+    gap: 10px;
+
+    button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .edit-btn {
+      color: $secondary;
+
+      &:hover {
+        color: $info;
+      }
+    }
+
+    .delete-btn {
+      color: $error;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.modal-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  width: 800px;
+  max-height: 90vh;
+  overflow: auto;
+}

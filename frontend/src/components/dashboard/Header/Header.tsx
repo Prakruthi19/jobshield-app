@@ -5,7 +5,7 @@ import './Header.scss';
 interface HeaderProps {
   title: string;
   isSidebarOpen: boolean;
-  setIsSidebarOpen: (open: boolean) => void;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function Header({ title, isSidebarOpen, setIsSidebarOpen }: HeaderProps) {
@@ -13,7 +13,7 @@ export default function Header({ title, isSidebarOpen, setIsSidebarOpen }: Heade
     <header className="header">
       <div className="header__left">
         <button 
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={() => setIsSidebarOpen(prev => !prev)}
           className={`header__menu-toggle ${isSidebarOpen ? 'header__menu-toggle--hidden' : ''}`}
         >
           <Menu size={24} />

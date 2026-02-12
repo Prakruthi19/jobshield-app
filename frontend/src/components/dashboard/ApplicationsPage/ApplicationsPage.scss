@@ -1,0 +1,21 @@
+.applications-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.application-card {
+  background: white;
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resume-link {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: none;
+}

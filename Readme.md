@@ -1,6 +1,6 @@
 # JobShield — Fake Job Detection & Hiring Platform
 
-A full-stack job portal that **protects candidates from fraudulent job postings** using Machine Learning while providing employers with a clean ATS-style hiring dashboard.
+A full-stack job portal that protects candidates from fraudulent job postings using Machine Learning while providing employers with a clean ATS-style hiring dashboard.
 
 JobShield combines a modern job board + resume submission system + fraud detection engine trained on real job posting data.
 
@@ -32,14 +32,40 @@ JobShield combines a modern job board + resume submission system + fraud detecti
 
 ---
 
-##  Machine Learning Model
+## Google Single Sign-On (SSO)
+
+JobShield supports secure login using Google OAuth.
+
+Users can sign in without creating a password, improving both security and usability.
+
+### How it works
+
+1. User clicks Continue with Google
+2. Google authenticates the user
+3. Backend verifies Google ID token
+4. If user exists → login
+   If not → account automatically created
+5. JWT session issued
+
+### Benefits
+
+* No password management
+* Reduced fake accounts
+* Faster onboarding
+* Secure authentication handled by Google
+
+The system also supports traditional email/password login, allowing flexible authentication methods.
+
+---
+
+## Machine Learning Model
 
 The fraud detection model is trained using real job posting data.
 
-📊 **Dataset:**
+Dataset:
 https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction/data
 
-📓 **Training Notebook (Google Colab):**
+Training Notebook (Google Colab):
 https://colab.research.google.com/drive/1VDXq3BEHAvIZqqWlhnunbRAKYPedk6fV#scrollTo=3ada2dc7
 
 The model analyzes:
@@ -52,11 +78,8 @@ The model analyzes:
 * Metadata patterns
 
 Output:
-
-```
 Fraud Probability Score (0 → 1)
 Trust Score (0 → 100)
-```
 
 ---
 
@@ -73,7 +96,8 @@ Trust Score (0 → 100)
 * Node.js + Express
 * Prisma ORM
 * REST API Architecture
-* Authentication (JWT)
+* JWT Authentication
+* Google OAuth Authentication
 
 ### Database
 
@@ -113,8 +137,6 @@ git clone https://github.com/Prakruthi19/jobshield-app.git
 cd jobshield-app
 ```
 
----
-
 ### 2. Backend Setup
 
 ```
@@ -129,9 +151,8 @@ Create `.env`:
 ```
 DATABASE_URL=postgresql://user:password@localhost:5432/jobshield
 JWT_SECRET=your_secret
+GOOGLE_CLIENT_ID=your_google_client_id
 ```
-
----
 
 ### 3. Frontend Setup
 
@@ -145,11 +166,12 @@ npm run dev
 
 ## Authentication Flow
 
-1. User registers / logs in
-2. JWT stored in sessionStorage
-3. Protected routes require token
-4. Employers access recruiter dashboard
-5. Seekers access application dashboard
+1. User logs in via Email/Password or Google
+2. Backend verifies credentials
+3. JWT stored in sessionStorage
+4. Protected routes require token
+5. Employers access recruiter dashboard
+6. Seekers access application dashboard
 
 ---
 
@@ -185,15 +207,13 @@ PATCH /api/users/profile
 
 When a job is created:
 
-```
 Job Created → Text processed → ML Model → Fraud Probability → Trust Score saved
-```
 
 Jobs with high risk can be flagged or hidden.
 
 ---
 
-## 📈 Future Improvements
+## Future Improvements
 
 * Firebase resume storage
 * Employer analytics dashboard
@@ -207,6 +227,7 @@ Jobs with high risk can be flagged or hidden.
 ## Security
 
 * JWT authentication
+* Google OAuth verification
 * Protected employer routes
 * Ownership verification on job updates
 * Resume access limited to job owner
@@ -215,7 +236,7 @@ Jobs with high risk can be flagged or hidden.
 
 ## Author
 
-**Prakruthi Koteshwar**
+Prakruthi Koteshwar
 Full Stack + ML Developer
 
 ---
@@ -223,6 +244,8 @@ Full Stack + ML Developer
 ## Purpose
 
 Online job scams are increasing rapidly.
-JobShield aims to make job searching **safer and trustworthy** using AI-assisted verification.
+JobShield aims to make job searching safer and trustworthy using AI-assisted verification.
 
 ---
+
+If you like the project — consider starring the repository.

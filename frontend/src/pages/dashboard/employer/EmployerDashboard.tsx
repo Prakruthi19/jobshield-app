@@ -13,6 +13,10 @@ import EmployerJobs from '../../../components/dashboard/ContentSection/EmployerJ
 import type { ProfileResponse } from '../../../types/profile';
 import { getUserProfile, updateUserProfile } from '../../../api/userService';
 import Profile from '../../../components/dashboard/ProfileSection/UserProfile';
+import type { EmployerApplication } from '../../../types/applications';
+import type { Job } from '../../../types/job';
+import { fetchEmployerApplications } from '../../../api/applications';
+import EmployerApplicationsPage from '../../../components/dashboard/EmployerApplicationsPage/EmployerApplicationsPage';
 type EditableField = "firstName" | "lastName" | "phone";
 const EmployerDashboard = () => {
 
@@ -36,26 +40,29 @@ const sectionTitles: Record<Section, string> = {
   profile: "Employer Profile",
   closedjobs: "Closed Jobs",
 };
+type UIState = {
+  sidebarOpen: boolean;
+  activeSection: Section;
+  showJobForm: boolean;
+  isSubmitting: boolean;
+};
   const [companies, setCompanies] = React.useState<Array<any>>([]);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [activeSection, setActiveSection] = useState('openjobs');
-    const [showJobForm, setShowJobForm] = useState(false);
-    const [jobs, setJobs] = useState<Array<any>>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [closedJobs, setClosedJobs] = useState<Array<any>>([]);
-  const [profileUser, setProfileUser] = useState<ProfileResponse | null>(null);
+const [ui, setUI] = useState<UIState>({
+  sidebarOpen: true,
+  activeSection: "openjobs",
+  showJobForm: false,
+  isSubmitting: false,
+});
+const [jobs, setJobs] = useState<Job[]>([]);
+const [closedJobs, setClosedJobs] = useState<Job[]>([]);
+const [applications, setApplications] = useState<EmployerApplication[]>([]);
+const [profileUser, setProfileUser] = useState<ProfileResponse | null>(null);
       const handleLogout = async () => {
     try{
-      // Call logout API
       const res = await logoutUser(); 
-      // Clear session storage
       sessionStorage.clear();   
-      // Redirect to login page
-
       window.location.href = '/'; 
       toast.success(res.data.message, { duration: 2000 });
-      
-     
     } catch (error) {
       toast.error('Logout failed. Please try again.');
     }
@@ -64,21 +71,23 @@ useEffect(() => {
   const fetchData = async () => {
     try {
 
-      const [companiesRes, jobsRes, closedJobRes, profileRes] = await Promise.all([
+      const [companiesRes, jobsRes, closedJobRes, profileRes, applicationsRes] = await Promise.all([
         getMyCompanies(),
         getMyJobs({ page: 1, limit: 10 , status: "ACTIVE"}),
         getMyJobs({ page: 1, limit: 10 , status: "CLOSED"}),
-        getUserProfile(sessionStorage.getItem("userId") || "")
+        getUserProfile(),
+        fetchEmployerApplications()
       ]);
       
       setJobs(jobsRes.data.data);
       setProfileUser(profileRes);
       setClosedJobs(closedJobRes.data.data);
+      setApplications(applicationsRes.data);
         if (jobsRes.data.data.length >= 1) {
           console.log("Hiding job form as jobs exist");
-        setShowJobForm(false);
+        setUI(prev => ({ ...prev, showJobForm: false }));
       } else {
-        setShowJobForm(true);
+        setUI(prev => ({ ...prev, showJobForm: true }));
       }
       setCompanies(companiesRes.data.data);
       console.log("Companies data:", companiesRes.data);
@@ -103,10 +112,10 @@ const handleJobSubmit = async (data: any) => {
   };
   console.log("Payload for job creation:", payload);
   try{
-    setIsSubmitting(true);
+    setUI(prev => ({ ...prev, isSubmitting: true }));
   const res = await createJob(payload);
   toast.success(res.data.message || "Job created successfully!");
-  setShowJobForm(false);
+  setUI(prev => ({ ...prev, showJobForm: false, isSubmitting: false }));
     console.log("Job created with data:", res);
     // Refresh job list
     const jobsRes = await getMyJobs({ page: 1, limit: 10 });
@@ -116,7 +125,7 @@ const handleJobSubmit = async (data: any) => {
     console.error("Error creating job:", error);
   }
   finally{
-      setIsSubmitting(false);
+      setUI(prev => ({ ...prev, isSubmitting: false }));
   }
 }
 
@@ -181,7 +190,7 @@ const handleDeleteJob = async (jobId: string) => {
 
     setProfileUser(prev => prev ? { ...prev, [field]: value } : prev);
     try{
-      const res = await updateUserProfile(sessionStorage.getItem("userId") || "", { [field]: value });
+      const res = await updateUserProfile({ [field]: value });
       toast.success(res.data.message);
     } catch (err) {
 
@@ -190,9 +199,11 @@ const handleDeleteJob = async (jobId: string) => {
     }
   };
 
-
+const toggleSidebar = () => {
+  setUI(prev => ({ ...prev, sidebarOpen: !prev.sidebarOpen }));
+};
 const renderSection = () => {
-  switch (activeSection) {
+  switch (ui.activeSection) {
     case "profile":
        if (!profileUser) return <div>Loading profile...</div>;
       return (
@@ -201,14 +212,13 @@ const renderSection = () => {
           onUpdate={updateProfile}
         />
       );
-    case "dashboard":
     case "openjobs":
-      if (showJobForm) {
+      if (ui.showJobForm) {
       return (
       <CreateJobForm
-      isSubmitting={isSubmitting}
+      isSubmitting={ui.isSubmitting}
       onSubmit={handleJobSubmit}
-      onClose={() => setShowJobForm(false)}
+      onClose={() => setUI(prev => ({ ...prev, showJobForm: false }))}
         />
       );
     }
@@ -218,7 +228,7 @@ const renderSection = () => {
         <div className="jobs-header">
         <button
           className="primary-btn"
-          onClick={() => setShowJobForm(true)}
+          onClick={() => setUI(prev => ({ ...prev, showJobForm: true }))}
         >
           Create Job
         </button>
@@ -234,7 +244,7 @@ const renderSection = () => {
           <p>Create a job posting for applicants and ML scoring</p>
           <button
             className="primary-btn"
-            onClick={() => setShowJobForm(true)}
+            onClick={() => setUI(prev => ({ ...prev, showJobForm: true }))}
           >
             Create Job
           </button>
@@ -248,7 +258,7 @@ const renderSection = () => {
             <div className="jobs-header">
             <button
               className="primary-btn"
-              onClick={() => setShowJobForm(true)}
+              onClick={() => setUI(prev => ({ ...prev, showJobForm: true }))}
             >
               Create Job
             </button>
@@ -263,6 +273,8 @@ const renderSection = () => {
           <h3>No Closed Jobs</h3>
         </div>
       );
+      case "jobapplications":
+      return <EmployerApplicationsPage jobApplications={applications} />;
     default:
       return <div>Select a section</div>;
     }
@@ -296,19 +308,19 @@ return (
 
     <SidebarEmployee
       user={profileUser || { firstName: "Loading...", lastName: "", email: "", phone: "", role: "" }}
-      isOpen={isSidebarOpen}
-      setIsOpen={setIsSidebarOpen}
-      activeSection={activeSection}
-      setActiveSection={setActiveSection}
-      stats={{ openJobs: jobs.length, jobApplications: 0}}
+      isOpen={ui.sidebarOpen}
+      setIsOpen={toggleSidebar}
+      activeSection={ui.activeSection}
+      setActiveSection={(section: Section) => setUI(prev => ({ ...prev, activeSection: section }))}
+      stats={{ openJobs: jobs.length, jobApplications: applications.length, closedJobs: closedJobs.length }}
       handleLogout={handleLogout}
     />
 
     <main className="main-content">
       <Header
-        title={sectionTitles[activeSection as Section] || "dashboard"} 
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
+        title={sectionTitles[ui.activeSection as Section] || "dashboard"} 
+         isSidebarOpen={ui.sidebarOpen}
+        setIsSidebarOpen={toggleSidebar}
       />
         <div className="content">
         {renderSection()}

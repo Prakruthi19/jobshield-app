@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { predictJobFraud } from '../ml/mlService';
 import { getTrustBadge } from '../utils/helper';
-import { AuthRequest } from './companyController';
 
+export type AuthRequest = Request & { user?: { id: string; role: string } };
 const prisma = new PrismaClient();
 
 // GET /jobs
@@ -439,26 +439,3 @@ export const applyToJob = async (req: Request, res: Response) => {
 };
 
 
-export const getMyApplications = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-
-    const applications = await prisma.jobApplication.findMany({
-      where: { userId },
-      include: {
-        job: {
-          include: {
-            company: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return res.json(applications);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Failed to fetch applications" });
-  }
-};

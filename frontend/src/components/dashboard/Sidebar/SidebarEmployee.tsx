@@ -1,12 +1,16 @@
-import { Briefcase, Bookmark, LogOut, X, User, CrossIcon } from 'lucide-react';
+import { Briefcase, Bookmark, LogOut, X, User } from 'lucide-react';
 import './SidebarEmployee.scss';
-
+type Section =
+  | "openjobs"
+  | "jobapplications"
+  | "profile"
+  | "closedjobs";
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   activeSection: string;
-  setActiveSection: (section: string) => void;
-  stats: { openJobs: number; jobApplications: number };
+  setActiveSection: (section: Section) => void;
+  stats: { openJobs: number; jobApplications: number, closedJobs: number };
   handleLogout: () => void;
  user: {
       firstName: string;
@@ -21,9 +25,9 @@ export default function Sidebar({ isOpen, setIsOpen, activeSection, setActiveSec
   const menuItems = [
     { id: 'openjobs', label: 'Open Jobs', icon: Briefcase, count: stats.openJobs },
     { id: 'jobapplications', label: 'Job Applications', icon: Bookmark, count: stats.jobApplications },
-    { id: 'closedjobs', label: 'Closed Jobs', icon: X },
+    { id: 'closedjobs', label: 'Closed Jobs', icon: X , count: stats.closedJobs},
     { id: 'profile', label: 'Profile', icon: User },
-  ];
+  ] as const;
 
 
   return (
@@ -54,14 +58,14 @@ export default function Sidebar({ isOpen, setIsOpen, activeSection, setActiveSec
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => setActiveSection(item.id as Section)}
                 className={`nav-menu__item ${activeSection === item.id ? 'nav-menu__item--active' : ''}`}
               >
                 <div className="nav-menu__item-content">
                   <Icon size={20} />
                   <span className="nav-menu__item-label">{item.label}</span>
                 </div>
-                {item.count && <span className="nav-menu__badge">{item.count}</span>}
+                {'count' in item && item.count && <span className="nav-menu__badge">{item.count}</span>}
               </button>
             );
           })}

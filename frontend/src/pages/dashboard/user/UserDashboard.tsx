@@ -7,7 +7,7 @@ import './UserDashboard.scss';
 import toast from 'react-hot-toast';
 import { logoutUser } from '../../../api/authService';
 import SidebarUser from '../../../components/dashboard/Sidebar/SidebarUser';
-import { fetchMyApplications, getAllJobs } from '../../../api/jobService';
+import { getMyJobApplications, getAllJobs } from '../../../api/jobService';
 import type { Job } from '../../../types/job';
 import Profile from '../../../components/dashboard/ProfileSection/UserProfile';
 import { getUserProfile, updateUserProfile } from '../../../api/userService';
@@ -53,8 +53,8 @@ useEffect(() => {
 
         const [jobsRes, userResponse, jobApplications]  = await Promise.all([
           getAllJobs({ page: pageNumber, limit: 10 , status: "all", sortBy: "updatedAt" , order: "desc" }),
-          getUserProfile(sessionStorage.getItem("userId") || ""),
-          fetchMyApplications(sessionStorage.getItem("userId") || "")
+          getUserProfile(),
+          getMyJobApplications()
         ]);
         setJobs(jobsRes.data.data);
         setProfileUser(userResponse);
@@ -109,7 +109,7 @@ useEffect(() => {
     // optimistic UI update
     setProfileUser(prev => prev ? { ...prev, [field]: value } : prev);
     try{
-      const res = await updateUserProfile(sessionStorage.getItem("userId") || "", { [field]: value });
+      const res = await updateUserProfile({ [field]: value });
       toast.success(res.data.message);
     } catch (err) {
       // rollback if backend fails

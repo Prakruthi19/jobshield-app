@@ -6,6 +6,7 @@ import prisma from './config/prisma';
 import jobRoutes from './routes/jobRoutes';
 import companyRoutes from './routes/companyRoutes';
 import userRoutes from './routes/userRoutes';
+import applicationRoutes from './routes/applicationRoutes';
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/applications', applicationRoutes);
 app.use("/uploads", express.static("uploads"));
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

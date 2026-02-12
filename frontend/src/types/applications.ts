@@ -25,3 +25,22 @@ export interface Application {
 
   job: Job;
 }
+
+
+export interface EmployerApplication {
+  id: string;
+  createdAt: string;
+  resumeUrl: string;
+  job: {
+    id: string;
+    title: string;
+    location: string;
+  };
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+}

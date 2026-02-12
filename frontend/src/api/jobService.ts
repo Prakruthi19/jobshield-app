@@ -69,12 +69,12 @@ export const updateJob = async (jobId: string, jobData: any) => {
 
 
 
-export const fetchMyApplications = async (userId: string) => {
+export const getMyJobApplications = async () => {
   const token = sessionStorage.getItem("accessToken");
-  return api.get(`/api/jobs/applications/${userId}`, {
+  return api.get(`/api/jobs/getUserApplications`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
-};
+}

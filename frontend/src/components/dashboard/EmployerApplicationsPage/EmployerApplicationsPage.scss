@@ -1,0 +1,20 @@
+.employer-applications {
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.application-card {
+  background:white;
+  padding:18px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid #e5e7eb;
+}
+
+.resume-btn {
+  color:#2563EB;
+  font-weight:600;
+}

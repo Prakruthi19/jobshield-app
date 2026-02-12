@@ -82,7 +82,6 @@ const handleLogin = async () => {
         setTimeout(() => navigate("/dashboard/user?tab=profile"), 1500);
         return;
     }
-      toast.success();
         setTimeout(() => {
         navigate("/dashboard/user");
       }, 1500);

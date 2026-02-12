@@ -1,9 +1,8 @@
 import type { ProfileResponse } from "../types/profile";
 import api from "./api";
-export const getUserProfile = async (userId: string): Promise<ProfileResponse> => {
+export const getUserProfile = async (): Promise<ProfileResponse> => {
     const token = sessionStorage.getItem("accessToken");
-
-    const res = await api.get(`/api/user/getUserProfile/${userId}`, {
+    const res = await api.get(`/api/user/getUserProfile`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -21,9 +20,9 @@ export const getUserProfile = async (userId: string): Promise<ProfileResponse> =
     };
 };
 
-export const updateUserProfile = async (userId: string, profileData: any) => {
+export const updateUserProfile = async (profileData: any) => {
     const token = sessionStorage.getItem("accessToken");
-    return api.put(`/api/user/updateUserProfile/${userId}`, profileData, {
+    return api.put(`/api/user/updateUserProfile`, profileData, {
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

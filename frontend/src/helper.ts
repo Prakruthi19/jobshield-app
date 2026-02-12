@@ -44,7 +44,7 @@ export const uploadResume = async ({
   formData.append("address", address);
   formData.append("resume", resume);
   const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`http://localhost:5000/api/jobs/applications/${jobId}`, {
+  const response = await fetch(`http://localhost:5000/api/applications/apply/${jobId}`, {
 
     method: "POST",
     body: formData,

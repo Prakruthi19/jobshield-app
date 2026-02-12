@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-
-export const getUserProfile = async (req: Request, res: Response) => {
+export type AuthRequest = Request & { user?: { id: string; role: string } };
+export const getUserProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -16,7 +19,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
                 role: true,
             },
         });
-        if (!user) {
+           if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
         return res.status(200).json({ user });
@@ -25,10 +28,14 @@ export const getUserProfile = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
-export const updateUserProfile = async (req: Request, res: Response) => {
+export const updateUserProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.params.userId;
-        const { firstName, lastName, phone } = req.body;    
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const { firstName, lastName, phone } = req.body;   
+
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: { firstName, lastName, phone },
@@ -39,9 +46,36 @@ export const updateUserProfile = async (req: Request, res: Response) => {
                 lastName: true,
                 phone: true,
                 role: true,
+                profileComplete: true,
             },
         });
-        return res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+    let finalUser = updatedUser;
+
+
+    if (!updatedUser.profileComplete) {
+
+      const isProfileComplete =
+        Boolean(updatedUser.firstName?.trim()) &&
+        Boolean(updatedUser.lastName?.trim()) &&
+        Boolean(updatedUser.phone?.trim());
+      if (isProfileComplete) {
+        finalUser = await prisma.user.update({
+          where: { id: userId },
+          data: { profileComplete: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+            profileComplete: true,
+          },
+        });
+      }
+    }
+
+        return res.status(200).json({ message: "Profile updated successfully", user: finalUser });
     }
 
     catch (err) {

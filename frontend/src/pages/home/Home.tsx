@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaShieldAlt
 } from "react-icons/fa";
@@ -104,26 +104,32 @@ const Home: React.FC = () => {
         </main>
 
         {/* Footer stats */}
-        <footer className="footer-stats">
-          <div className="stat-item">
-            <div className="stat-number">50K+</div>
-            <div className="stat-label">Jobs Verified</div>
-          </div>
+      <div className="footer-wrapper">
+  <footer className="footer-stats">
+    <div className="stat-item">
+      <div className="stat-number">50K+</div>
+      <div className="stat-label">Jobs Verified</div>
+    </div>
 
-          <div className="stat-divider" />
+    <div className="stat-divider" />
 
-          <div className="stat-item">
-            <div className="stat-number">98%</div>
-            <div className="stat-label">Accuracy Rate</div>
-          </div>
+    <div className="stat-item">
+      <div className="stat-number">98%</div>
+      <div className="stat-label">Accuracy Rate</div>
+    </div>
 
-          <div className="stat-divider" />
+    <div className="stat-divider" />
 
-          <div className="stat-item">
-            <div className="stat-number">24/7</div>
-            <div className="stat-label">Protection</div>
-          </div>
-        </footer>
+    <div className="stat-item">
+      <div className="stat-number">24/7</div>
+      <div className="stat-label">Protection</div>
+    </div>
+  </footer>
+    {/* This sits directly below the footer-stats bar */}
+    <div className="admin-link-container">
+      <Link to="/login/auth/admin">Admin Account</Link>
+    </div>
+  </div>
       </div>
     </div>
   );

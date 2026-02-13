@@ -7,6 +7,7 @@ import jobRoutes from './routes/jobRoutes';
 import companyRoutes from './routes/companyRoutes';
 import userRoutes from './routes/userRoutes';
 import applicationRoutes from './routes/applicationRoutes';
+import adminRoutes from './routes/adminRoutes';
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
@@ -41,6 +42,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/admin', adminRoutes);
 app.use("/uploads", express.static("uploads"));
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

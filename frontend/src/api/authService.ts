@@ -26,3 +26,8 @@ export const googleLogin = async (credential: string, role: string): Promise<Goo
 
   return res.data;
 };
+
+
+export const adminEnter = (endpoint: "/admin/login" | "/admin/register", data: any) => {
+  return api.post("/api" + endpoint, data);
+};

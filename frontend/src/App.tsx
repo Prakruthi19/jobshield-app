@@ -10,6 +10,8 @@ import EmployerLogin from './pages/auth/employer/EmployerLogin';
 import EmployerRegister from './pages/auth/employer/EmployerRegister';
 import EmployerDashboard from './pages/dashboard/employer/EmployerDashboard';
 import JobDetailsPage from './pages/dashboard/user/jobs/JobDetailsPage';
+import AdminAuthPage from './pages/auth/admin/AdminAuth';
+import AdminDashboard from './pages/dashboard/admin/AdminDashboard';
 
 
 const App = () => {
@@ -43,6 +45,8 @@ const App = () => {
         <Route path="/register/auth/employer/" element={<EmployerRegister />} />
         <Route path="/dashboard/user/" element={<UserDashboard />} />
         <Route path="/dashboard/employer/" element={<EmployerDashboard />} />
+        <Route path="/login/auth/admin/" element={<AdminAuthPage />} />
+        <Route path="/dashboard/admin/" element={<AdminDashboard />} />
         <Route
             path="/dashboard/user/jobs/JobDetails/:id"
             element={<JobDetailsPage />}

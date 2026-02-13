@@ -435,3 +435,17 @@ enum NotificationType {
   TRUST_SCORE_ALERT
   MESSAGE
 }
+
+
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+
+  @@index([id])
+  @@map("admin")
+}
+

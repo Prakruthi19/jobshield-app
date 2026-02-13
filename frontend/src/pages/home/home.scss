@@ -25,7 +25,9 @@ $border: rgba(255, 255, 255, 0.15);
   font-family: "Inter", system-ui, sans-serif;
   color: $text-light;
   background: radial-gradient(circle at 20% 20%, #1e293b 0%, $bg-dark 60%);
-  overflow: hidden;
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  
   position: relative;
 }
 
@@ -65,7 +67,11 @@ $border: rgba(255, 255, 255, 0.15);
   z-index: 2;
   padding: 40px 24px;
   max-width: 1200px;
-  margin: auto;
+  margin: 0 auto; /* Change 'auto' to '0 auto' */
+  
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* =========================
@@ -105,7 +111,7 @@ $border: rgba(255, 255, 255, 0.15);
 }
 
 .hero-title {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 800;
   line-height: 1.1;
 }
@@ -230,37 +236,56 @@ $border: rgba(255, 255, 255, 0.15);
 /* =========================
    Footer Stats
 ========================= */
-.footer-stats {
-  margin-top: 90px;
+/* The container that holds both the bar and the link */
+.footer-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 34px;
-  opacity: .9;
-  flex-wrap: wrap;
+  gap: 12px;
+  padding: 40px 0 40px; /* More top padding to separate from cards */
+  width: 100%;
+  margin-top: auto; /* Pushes footer to bottom of content-wrapper */
 }
 
-.stat-item {
-  text-align: center;
+.footer-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 
 .stat-number {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #a5b4fc;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: $text-light; /* Use your light variable */
 }
 
 .stat-label {
-  font-size: .85rem;
-  color: $text-dim;
+  font-size: 0.55rem;
+  color: $text-dim; /* Use your dimmed variable */
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .stat-divider {
   width: 1px;
-  height: 34px;
-  background: rgba(255,255,255,.2);
+  height: 35px;
+  background-color: $border; /* Use your glass border variable */
 }
 
+.admin-link-container a {
+  font-size: 0.85rem;
+  color: $text-dim;
+  text-decoration: none;
+  opacity: 0.6;
+  transition: 0.3s;
+
+  &:hover {
+    color: $primary;
+    opacity: 1;
+  }
+}
 /* =========================
    Responsive
 ========================= */

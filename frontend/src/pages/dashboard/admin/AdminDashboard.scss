@@ -1,0 +1,105 @@
+.admin {
+  display: flex;
+  height: 100vh;
+  font-family: system-ui;
+
+  &__sidebar {
+    width: 220px;
+    background: #0b3d91;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 6px;
+
+      &:hover {
+        background: rgba(255,255,255,0.15);
+      }
+
+      &.active {
+        background: #2563eb;
+      }
+    }
+  }
+
+  &__content {
+    flex: 1;
+    background: #f3f4f6;
+    padding: 25px;
+    overflow: auto;
+  }
+}
+
+/* Stats cards */
+
+.overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+
+  h3 {
+    font-size: 28px;
+    margin-bottom: 6px;
+    color: #111827;
+  }
+
+  p {
+    color: #6b7280;
+  }
+
+  &.danger h3 {
+    color: #ef4444;
+  }
+}
+
+/* Tables */
+
+.table {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    tbody tr {
+      border-top: 1px solid #e5e7eb;
+    }
+
+    tbody tr.fraud {
+      background: rgba(239,68,68,0.08);
+    }
+  }
+}

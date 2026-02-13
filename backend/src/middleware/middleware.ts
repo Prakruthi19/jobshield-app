@@ -1,8 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import prisma from "../config/prisma";
+
+export type AuthRequest = Request & { 
+  user?: { id: string; role: string };
+  admin?: any;
+  role?: string;
+  authType?: string;
+};
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { id: string; role: string };
+      admin?: any;
+      role?: string;
+      authType?: string;
+    }
+  }
+}
 
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     res.status(401).json({ message: "Missing token" });
@@ -21,16 +40,34 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
   try {
     const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
 
-    // attach user to request
-    (req as any).user = {
-      id: decoded.userId,
-      role: decoded.role,
-    };
+    if (decoded.role === "ADMIN") {
+      const admin = await prisma.admin.findUnique({
+        where: { id: decoded.id }
+      });
+
+      if (!admin) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      req.user = { id: admin.id, role: "ADMIN" };
+    } else {
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id }
+      });
+
+      if (!user) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      req.user = { id: user.id, role: user.role || "USER" };
+    }
 
     next();
+
   } catch (err) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
+    res.status(401).json({ message: "Invalid token" });
   }
 };
 
@@ -52,4 +89,12 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
 
     next();
   };
+};
+
+export const authorizeAdmin = (req: AuthRequest, res: Response, next: NextFunction) : void => {
+  if (!req.user || req.user.role !== "ADMIN") {
+    res.status(403).json({ message: "Admin access required" });
+    return;
+  }
+  next();
 };

@@ -251,3 +251,107 @@ export const googleAuth = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Google authentication failed" });
   }
 };
+
+
+export const adminRegister = async (req: Request, res: Response) => {
+  try {
+    const { email, password, secretKey} = req.body;
+
+
+    if (secretKey !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ message: "Invalid admin secret key" });
+    }
+    const adminExists = await prisma.user.count({
+      where: { role: "ADMIN" }
+    });
+
+    if (adminExists > 0) {
+      return res.status(403).json({ message: "Admin already created" });
+    }
+
+    const existing = await prisma.admin.findUnique({
+      where: { email }
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const admin = await prisma.admin.create({
+      data: {
+        email,
+        password: hashed,
+        role: "ADMIN",
+      }
+    });
+      const token = jwt.sign(
+      {
+        userId: admin.id,
+        role: admin.role,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({ token });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const adminLogin = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { email }
+    });
+
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+
+    const valid = await bcrypt.compare(password, admin.password);
+
+    if (!valid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+ 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing in env");
+    }
+
+    const token = jwt.sign(
+      {
+        id: admin.id,
+        role: admin.role,
+        type: "admin" 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    return res.json({
+      token,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+
+  } catch (err) {
+    console.error("Admin login error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
